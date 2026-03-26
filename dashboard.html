@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BBS Dashboard - Real Time</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #D4AF37; --dark-bg: #050A1A; --card-bg: #0A192F; --cream: #FDFDD0; --text-white: #FFFFFF; }
+        body { font-family: 'Poppins', sans-serif; background: radial-gradient(circle, #102A43 0%, #050A1A 100%); color: var(--text-white); margin: 0; text-align: center; }
+        .header-bbs { padding: 20px; background: rgba(0,0,0,0.4); border-bottom: 2px solid var(--gold); display: flex; justify-content: center; align-items: center; gap: 15px; }
+        .header-logo { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--gold); background-image: url('https://raw.githubusercontent.com/yefryZA/PT.BBS/main/logo.png'); background-size: cover; background-position: center; }
+        .header-title h1 { font-family: 'Cinzel', serif; font-size: 18px; color: var(--gold); margin: 0; }
+        .content-container { padding: 20px; max-width: 600px; margin: 0 auto; }
+        .stat-card { background: var(--card-bg); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; padding: 20px; margin-bottom: 15px; box-shadow: 0 0 15px rgba(212,175,55,0.2); }
+        .margin-card { border: 2px solid var(--gold); background: linear-gradient(135deg, #0A192F 0%, #102A43 100%); }
+        .stat-title { font-size: 11px; color: var(--gold); margin-bottom: 5px; font-weight: bold; }
+        .stat-value { font-size: 24px; font-weight: bold; }
+        .grid-partners { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .partner-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(212,175,55,0.1); }
+        .partner-value { font-size: 14px; font-weight: bold; color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="header-bbs">
+        <div class="header-logo"></div>
+        <div class="header-title"><h1>PT. BERKAH BAJA STEEL</h1></div>
+    </div>
+    <div class="content-container">
+        <div class="stat-card">
+            <div class="stat-title">PROYEK AKTIF</div>
+            <div style="font-family:'Cinzel'; color:var(--cream);">PENGIRIMAN PASIR 01 - CILEGON</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">UANG MASUK (BUYER)</div>
+            <div class="stat-value" style="color:#77DD77;">Rp 150.000.000</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">TOTAL OPERASIONAL 📤</div>
+            <div class="stat-value" id="total-ops" style="color:#FFB347;">Rp 0</div>
+        </div>
+        <div class="stat-card margin-card">
+            <div class="stat-title">TOTAL MARGIN BERSIH 💰</div>
+            <div class="stat-value" id="total-margin" style="color:var(--gold); font-family:'Cinzel';">Rp 0</div>
+        </div>
+        <div class="grid-partners" id="partner-list"></div>
+    </div>
+
+<script>
+    // DATABASE INI YANG AKAN DIISI OTOMATIS OLEH INPUT_BBS.HTML
+    const dataProyekBBS = {
+        uangBuyer: 150000000,
+        tagihanOwner: 125000000,
+        listPengeluaran: [
+            { tgl: "26/03", desc: "Saldo Awal Proyek", cost: 0 },
+        ]
+    };
+
+    function updateDashboard() {
+        let totalKeluar = dataProyekBBS.listPengeluaran.reduce((sum, item) => sum + item.cost, 0);
+        let marginBersih = dataProyekBBS.uangBuyer - dataProyekBBS.tagihanOwner - totalKeluar;
+        let perOrang = marginBersih / 4;
+
+        document.getElementById('total-ops').innerText = "Rp " + totalKeluar.toLocaleString('id-ID');
+        document.getElementById('total-margin').innerText = "Rp " + marginBersih.toLocaleString('id-ID');
+        
+        let html = '';
+        for(let i=1; i<=4; i++) {
+            html += `<div class="partner-card"><div style="font-size:10px; opacity:0.7;">Mitra ${i}</div><div class="partner-value">Rp ${perOrang.toLocaleString('id-ID')}</div></div>`;
+        }
+        document.getElementById('partner-list').innerHTML = html;
+    }
+    updateDashboard();
+</script>
+</body>
+</html>
