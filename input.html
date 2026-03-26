@@ -32,22 +32,29 @@
         const cost = document.getElementById('cost').value;
         if(!desc || !cost) return alert("Isi dulu Bos!");
 
-        // 1. MINTA TOKEN SECARA MANUAL SAAT DIKLIK
-        const T = prompt("MASUKKAN TOKEN GITHUB (ghp_...) :"); 
-        if(!T) return alert("Wajib masukkan token biar tembus!");
+        // 1. Minta Token (Hati-hati jangan ada spasi pas paste!)
+        const rawToken = prompt("MASUKKAN TOKEN GITHUB (ghp_...) :"); 
+        const T = rawToken ? rawToken.trim() : null; // Buang spasi hantu
+        
+        if(!T) return alert("Wajib masukkan token!");
 
         const btn = document.getElementById('btnSubmit');
-        const status = document.getElementById('status');
         btn.disabled = true;
-        status.innerText = "⏳ Sedang Menembus Server...";
+        document.getElementById('status').innerText = "🚀 Menghubungi Brankas BBS...";
 
         try {
-            // Ambil data file target dengan anti-cache
-            const res = await fetch(`https://api.github.com/repos/${O}/${R}/contents/${P}?t=${Date.now()}`, {
-                headers: { "Authorization": `token ${T}`, "Cache-Control": "no-cache" }
+            // Kita panggil GitHub dengan cara yang lebih ramah
+            const res = await fetch(`https://api.github.com/repos/${O}/${R}/contents/${P}`, {
+                method: "GET",
+                headers: { 
+                    "Authorization": `Bearer ${T}`,
+                    "Accept": "application/vnd.github+json"
+                }
             });
 
-            if (!res.ok) throw new Error("Token salah atau file tidak ketemu!");
+            if (res.status === 401) throw new Error("Token Habi Salah atau Kadaluarsa!");
+            if (res.status === 404) throw new Error("File dashboard.html tidak ketemu!");
+            if (!res.ok) throw new Error("Koneksi ke GitHub Gagal!");
 
             const file = await res.json();
             let text = decodeURIComponent(escape(window.atob(file.content.replace(/\s/g, ''))));
@@ -55,33 +62,37 @@
             const today = new Date().toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'});
             const newItem = `{ tgl: "${today}", desc: "${desc}", cost: ${Number(cost)} },`;
             
-            // Cari listPengeluaran (Gunakan regex agar lebih kuat)
-            if (text.match(/listPengeluaran:\s*\[/)) {
-                text = text.replace(/listPengeluaran:\s*\[/, "listPengeluaran: [\n            " + newItem);
+            // Masukkan data (Cek kalau listPengeluaran ada)
+            if (text.includes("listPengeluaran: [")) {
+                text = text.replace("listPengeluaran: [", "listPengeluaran: [\n            " + newItem);
             } else {
-                throw new Error("Tulisan 'listPengeluaran: [' tidak ada di dashboard.html!");
+                throw new Error("Teks 'listPengeluaran: [' hilang di dashboard.html!");
             }
 
-            // Kirim Update ke GitHub
+            // Kirim balik ke GitHub
             const up = await fetch(`https://api.github.com/repos/${O}/${R}/contents/${P}`, {
                 method: "PUT",
-                headers: { "Authorization": `token ${T}`, "Content-Type": "application/json" },
+                headers: { 
+                    "Authorization": `Bearer ${T}`,
+                    "Content-Type": "application/json" 
+                },
                 body: JSON.stringify({
-                    message: "BBS Update: " + desc,
+                    message: "Update: " + desc,
                     content: btoa(unescape(encodeURIComponent(text))),
                     sha: file.sha
                 })
             });
 
             if(up.ok) {
-                alert("SENGGOL DONG! BERHASIL! 😎💰");
+                alert("SENGGOL DONG! BERHASIL MASUK! 😎💰");
                 location.reload();
-            } else { 
-                throw new Error("Gagal update! Cek izin token Habi.");
+            } else {
+                throw new Error("Gagal Update! Cek koneksi internet.");
             }
-        } catch (e) { 
-            alert("INFO CIMI: " + e.message);
-            status.innerText = "❌ Gagal: " + e.message;
+
+        } catch (e) {
+            alert("⚠️ PESAN CIMI: " + e.message);
+            document.getElementById('status').innerText = "❌ " + e.message;
         } finally {
             btn.disabled = false;
         }
