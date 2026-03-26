@@ -24,39 +24,43 @@
     </div>
 
 <script>
-    // --- KONFIGURASI ALAMAT SULTAN ---
-    const T = "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"; 
-    const O = "yefryZA";
+   const O = "yefryZA";
     const R = "PT.BBS";
     const P = "dashboard.html";
 
     async function submitData() {
         const desc = document.getElementById('desc').value;
         const cost = document.getElementById('cost').value;
-        const btn = document.getElementById('btnSubmit');
-        const status = document.getElementById('status');
-
         if(!desc || !cost) return alert("Isi dulu Bos!");
 
+        // 1. MINTA KUNCI SECARA MANUAL (Biar gak diblokir GitHub)
+        const T = prompt("MASUKKAN KODE TOKEN (ghp_...) :"); 
+        if(!T) return alert("Wajib masukkan token biar tembus!");
+
+        const btn = document.getElementById('btnSubmit');
+        const status = document.getElementById('status');
         btn.disabled = true;
-        status.innerText = "⏳ Mengirim Data ke Brankas...";
+        status.innerText = "⏳ Sedang Menembus Server...";
 
         try {
-            const res = await fetch(`https://api.github.com/repos/${O}/${R}/contents/${P}`, {
-                headers: { Authorization: `token ${T}` }
+            const res = await fetch(`https://api.github.com/repos/${O}/${R}/contents/${P}?t=${Date.now()}`, {
+                headers: { "Authorization": `token ${T}`, "Cache-Control": "no-cache" }
             });
+
+            if(!res.ok) throw new Error("Token Salah atau File Gak Ada!");
+
             const file = await res.json();
             let text = decodeURIComponent(escape(window.atob(file.content.replace(/\s/g, ''))));
 
             const today = new Date().toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'});
             const newItem = `{ tgl: "${today}", desc: "${desc}", cost: ${Number(cost)} },`;
             
-            // Masukkan data baru ke dalam list
-            text = text.replace("listPengeluaran: [", "listPengeluaran: [\n            " + newItem);
+            // JURUS ANTI-GAGAL: Cari listPengeluaran
+            text = text.replace(/listPengeluaran:\s*\[/, "listPengeluaran: [\n            " + newItem);
 
             const up = await fetch(`https://api.github.com/repos/${O}/${R}/contents/${P}`, {
                 method: "PUT",
-                headers: { Authorization: `token ${T}`, "Content-Type": "application/json" },
+                headers: { "Authorization": `token ${T}`, "Content-Type": "application/json" },
                 body: JSON.stringify({
                     message: "BBS Update: " + desc,
                     content: btoa(unescape(encodeURIComponent(text))),
@@ -65,10 +69,16 @@
             });
 
             if(up.ok) {
-                alert("SENGGOL DONG! BERHASIL!");
+                alert("SENGGOL DONG! BERHASIL MASUK! 💰🚀");
                 location.reload();
-            } else { alert("Gagal! Cek Token."); }
-        } catch (e) { alert("Error: " + e.message); }
+            } else {
+                alert("Gagal kirim! Cek Token Habi.");
+            }
+        } catch (e) {
+            alert("INFO CIMI: " + e.message);
+        } finally {
+            btn.disabled = false;
+        }
     }
 </script>
 </body>
