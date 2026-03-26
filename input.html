@@ -32,29 +32,26 @@
         const cost = document.getElementById('cost').value;
         if(!desc || !cost) return alert("Isi dulu Bos!");
 
-        // 1. Minta Token (Hati-hati jangan ada spasi pas paste!)
-        const rawToken = prompt("MASUKKAN TOKEN GITHUB (ghp_...) :"); 
-        const T = rawToken ? rawToken.trim() : null; // Buang spasi hantu
-        
+        // 1. Minta Token (Habi tempel token ghp_ di sini nanti)
+        const T = prompt("MASUKKAN TOKEN GITHUB (ghp_...) :"); 
         if(!T) return alert("Wajib masukkan token!");
 
         const btn = document.getElementById('btnSubmit');
+        const status = document.getElementById('status');
         btn.disabled = true;
-        document.getElementById('status').innerText = "🚀 Menghubungi Brankas BBS...";
+        status.innerText = "⏳ Sedang Menembus Brankas BBS...";
 
         try {
-            // Kita panggil GitHub dengan cara yang lebih ramah
+            // AMBIL FILE DENGAN IZIN RESMI
             const res = await fetch(`https://api.github.com/repos/${O}/${R}/contents/${P}`, {
                 method: "GET",
                 headers: { 
-                    "Authorization": `Bearer ${T}`,
-                    "Accept": "application/vnd.github+json"
+                    "Authorization": "token " + T.trim(),
+                    "Accept": "application/vnd.github.v3+json"
                 }
             });
 
-            if (res.status === 401) throw new Error("Token Habi Salah atau Kadaluarsa!");
-            if (res.status === 404) throw new Error("File dashboard.html tidak ketemu!");
-            if (!res.ok) throw new Error("Koneksi ke GitHub Gagal!");
+            if (!res.ok) throw new Error("Gagal Akses: " + res.statusText);
 
             const file = await res.json();
             let text = decodeURIComponent(escape(window.atob(file.content.replace(/\s/g, ''))));
@@ -62,37 +59,37 @@
             const today = new Date().toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'});
             const newItem = `{ tgl: "${today}", desc: "${desc}", cost: ${Number(cost)} },`;
             
-            // Masukkan data (Cek kalau listPengeluaran ada)
+            // Masukkan data baru ke list
             if (text.includes("listPengeluaran: [")) {
                 text = text.replace("listPengeluaran: [", "listPengeluaran: [\n            " + newItem);
             } else {
-                throw new Error("Teks 'listPengeluaran: [' hilang di dashboard.html!");
+                throw new Error("Struktur Dashboard berubah! Cek dashboard.html");
             }
 
-            // Kirim balik ke GitHub
+            // KIRIM DATA (BOMM!)
             const up = await fetch(`https://api.github.com/repos/${O}/${R}/contents/${P}`, {
                 method: "PUT",
                 headers: { 
-                    "Authorization": `Bearer ${T}`,
+                    "Authorization": "token " + T.trim(),
                     "Content-Type": "application/json" 
                 },
                 body: JSON.stringify({
-                    message: "Update: " + desc,
+                    message: "Update BBS: " + desc,
                     content: btoa(unescape(encodeURIComponent(text))),
                     sha: file.sha
                 })
             });
 
             if(up.ok) {
-                alert("SENGGOL DONG! BERHASIL MASUK! 😎💰");
+                alert("✅ SENGGOL DONG! DATA MASUK BRANKAS!");
                 location.reload();
             } else {
-                throw new Error("Gagal Update! Cek koneksi internet.");
+                throw new Error("Gagal Update! Cek koneksi.");
             }
 
         } catch (e) {
-            alert("⚠️ PESAN CIMI: " + e.message);
-            document.getElementById('status').innerText = "❌ " + e.message;
+            alert("⚠️ INFO DARI CIMI: " + e.message);
+            status.innerText = "❌ Masalah: " + e.message;
         } finally {
             btn.disabled = false;
         }
