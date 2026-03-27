@@ -47,13 +47,51 @@
     box-sizing: border-box;
 }
     
+
+.running-text-container {
+    background: rgba(0, 0, 0, 0.6);
+    border-top: 1px solid rgba(212, 175, 55, 0.3);
+    padding: 12px 0;
+    margin-top: 10px;
+    overflow: hidden; /* Sembunyikan teks yang keluar jalur */
+    white-space: nowrap;
+    border-radius: 0 0 15px 15px;
+    position: relative;
+    display: flex;
+}
+
+.marquee-text {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    color: var(--gold);
+    font-weight: bold;
+    letter-spacing: 2px;
+    padding-left: 100%; /* Mulai dari ujung kanan luar */
+    animation: marquee-baja 20s linear infinite;
+}
+
+/* Animasi murni dari kanan layar ke kiri layar */
+@keyframes marquee-baja {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-100%, 0); }
+}
+
+.designer-credit {
+    font-size: 12px;
+    color: rgba(253, 253, 208, 0.5); /* Warna Cream pudar */
+    text-align: center;
+    margin-top: 15px;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 1px;
+}
     </style>
 </head>
 <body>
 
     <div class="header-bbs">
         <div class="header-logo"></div>
-        <div class="header-title"><h1>PT. BERKAH BAJA STEEL<br><span style="font-size: 0.8em; color: var(--cream);">General Contraktor & Logistic</span></h1></div>
+         <div class="header-title"><h1>PT. BERKAH BAJA STEEL<br><span style="font-size: 0.8em; color: var(--cream);">General Contraktor & Logistic</span></h1></div>
     </div>
 
     <div class="time-bar">
@@ -65,7 +103,7 @@
     
     <div class="proyek-card">
         <div class="proyek-label">PROYEK AKTIF</div>
-        <div class="proyek-name">PENGIRIMAN MATERIAL SPLIT MARUNDA</div>
+        <div class="proyek-name">Pengiriman Material Spli ke Marunda</div>
     </div>
 
     <div class="row-flex">
@@ -97,7 +135,7 @@
         </div>
         <div class="col-flex">
             <div class="summary-card">
-                <div class="summary-label">MARGIN PER MITRA</div>
+                <div class="summary-label">BAGI HASIL</div>
                 <div class="summary-value" id="val-mitra">Rp 0</div>
             </div>
         </div>
@@ -109,6 +147,17 @@
     </div>
 
 </div>
+
+<div class="running-text-container">
+        <div class="marquee-text">
+            NIAT BAIK 🎀 KERJA BAIK 🎀 REZEKI BAIK
+        </div>
+    </div>
+
+    <div class="designer-credit">
+        desain web by_yefry.ZA © BBS-2026
+    </div>
+</div> 
 
     <div id="myModal" class="modal">
         <div class="modal-content">
