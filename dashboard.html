@@ -1,76 +1,296 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BBS Dashboard - Real Time</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@300;400;600&family=Orbitron:wght@500&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #D4AF37; --dark-bg: #050A1A; --card-bg: #0A192F; --cream: #FDFDD0; --text-white: #FFFFFF; }
-        body { font-family: 'Poppins', sans-serif; background: radial-gradient(circle, #102A43 0%, #050A1A 100%); color: var(--text-white); margin: 0; text-align: center; }
-        .header-bbs { padding: 20px; background: rgba(0,0,0,0.4); border-bottom: 2px solid var(--gold); display: flex; justify-content: center; align-items: center; gap: 15px; }
-        .header-logo { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--gold); background-image: url('https://raw.githubusercontent.com/yefryZA/PT.BBS/main/logo.png'); background-size: cover; background-position: center; }
-        .header-title h1 { font-family: 'Cinzel', serif; font-size: 18px; color: var(--gold); margin: 0; }
-        .content-container { padding: 20px; max-width: 600px; margin: 0 auto; }
-        .stat-card { background: var(--card-bg); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 15px; padding: 20px; margin-bottom: 15px; box-shadow: 0 0 15px rgba(212,175,55,0.2); }
+        :root {
+            --gold: #D4AF37;
+            --dark-bg: #050A1A;
+            --card-bg: #0A192F;
+            --cream: #FDFDD0;
+            --text-white: #FFFFFF;
+        }
+        
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: radial-gradient(circle, #102A43 0%, #050A1A 100%); 
+            color: var(--text-white); 
+            margin: 0; 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden; /* Mencegah scroll kesamping */
+        }
+        
+        /* --- 🏛️ HEADER UTAMA (Logo & PT) --- */
+        .header-bbs { 
+            padding: 15px; 
+            background: rgba(0,0,0,0.6); 
+            border-bottom: 2px solid var(--gold); 
+            display: flex;
+            justify-content: center; /* Posisi di tengah layar */
+            align-items: center; 
+            gap: 15px;
+        }
+        
+        .header-logo { 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            border: 2px solid var(--gold); 
+            background-image: url('https://raw.githubusercontent.com/yefryZA/PT.BBS/main/logo.png'); 
+            background-size: cover; 
+            background-position: center;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+            flex-shrink: 0; /* Logo gak boleh gepeng */
+        }
+
+        .header-title h1 { 
+            font-family: 'Cinzel', serif; 
+            font-size: 16px; /* Gede & Gagah */
+            color: var(--gold); 
+            margin: 0; 
+            line-height: 1.2;
+            white-space: nowrap; /* Tetap sebaris */
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+
+        /* --- 🕒 BARIS JAM BARU (Di bawah Header) --- */
+        .time-bar {
+            background: rgba(0,0,0,0.3);
+            padding: 8px 15px;
+            border-bottom: 1px solid rgba(212,175,55,0.2);
+            display: flex;
+            justify-content: space-between; /* Tanggal Kiri, Jam Kanan */
+            align-items: center;
+            color: var(--cream);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #digital-clock {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: var(--gold);
+            text-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+        }
+        
+        /* --- 📦 CONTENT CONTAINER (Atletis & Presisi) --- */
+        .content-container { 
+            padding: 15px; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px; /* Jarak antar kotak pas */
+            box-sizing: border-box;
+            flex-grow: 1;
+        }
+
+        /* Kotak Proyek (Gaya Minimalis) */
+        .proyek-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .proyek-label { font-size: 9px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .proyek-name { font-family: 'Cinzel', serif; color: var(--cream); font-size: 13px; letter-spacing: 0.5px; }
+
+        /* Layout Kotak Berjejer */
+        .row-flex { display: flex; gap: 10px; }
+        .col-flex { flex: 1; min-width: 0; }
+
+        /* Kartu Statistik Utama */
+        .stat-card { 
+            background: var(--card-bg); 
+            border: 1px solid rgba(212, 175, 55, 0.2); 
+            border-radius: 15px; 
+            padding: 15px 10px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        .stat-card:active { transform: scale(0.98); }
+
+        /* Variasi Kartu */
         .margin-card { border: 2px solid var(--gold); background: linear-gradient(135deg, #0A192F 0%, #102A43 100%); }
-        .stat-title { font-size: 11px; color: var(--gold); margin-bottom: 5px; font-weight: bold; }
-        .stat-value { font-size: 24px; font-weight: bold; }
-        .grid-partners { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .partner-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(212,175,55,0.1); }
-        .partner-value { font-size: 14px; font-weight: bold; color: var(--gold); }
+        .marketing-card { border: 1px solid #FF69B4; background: rgba(255, 105, 180, 0.05); }
+
+        /* Kartu Ringkasan (Garis Putus-Putus) */
+        .summary-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px dashed rgba(212, 175, 55, 0.5);
+            border-radius: 12px;
+            padding: 12px 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Label & Nilai */
+        .stat-title, .summary-label { font-size: 8px; color: var(--gold); font-weight: bold; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px; }
+        .stat-value, .summary-value { font-size: 16px; font-weight: bold; } 
+        
+        /* MODAL / POPUP */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(5px); }
+        .modal-content { background: var(--card-bg); margin: 10% auto; padding: 20px; border: 1px solid var(--gold); width: 85%; max-width: 400px; border-radius: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+        th { color: var(--gold); padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; }
+        td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
     </style>
 </head>
 <body>
+
     <div class="header-bbs">
         <div class="header-logo"></div>
         <div class="header-title"><h1>PT. BERKAH BAJA STEEL</h1></div>
     </div>
+
+    <div class="time-bar">
+        <div id="digital-date">MEMUAT TANGGAL...</div>
+        <div id="digital-clock">00:00:00</div>
+    </div>
+
     <div class="content-container">
-        <div class="stat-card">
-            <div class="stat-title">PROYEK AKTIF</div>
-            <div style="font-family:'Cinzel'; color:var(--cream);">PENGIRIMAN PASIR 01 - CILEGON</div>
+        
+        <div class="proyek-card">
+            <div class="proyek-label">PROYEK AKTIF</div>
+            <div class="proyek-name">PENGIRIMAN SPLIT MARUNDA</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-title">UANG MASUK (BUYER)</div>
-            <div class="stat-value" style="color:#77DD77;">Rp 150.000.000</div>
+
+        <div class="row-flex">
+            <div class="col-flex">
+                <div class="stat-card">
+                    <div class="stat-title">UANG MASUK (BUYER)</div>
+                    <div class="stat-value" id="val-buyer" style="color:#77DD77;">Rp 0</div>
+                </div>
+            </div>
+            <div class="col-flex">
+                <div class="stat-card" onclick="openModal()" style="cursor:pointer; border-color: #FFB347;">
+                    <div class="stat-title">OPERASIONAL 📤 (Klik)</div>
+                    <div class="stat-value" id="total-ops" style="color:#FFB347;">Rp 0</div>
+                </div>
+            </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-title">TOTAL OPERASIONAL 📤</div>
-            <div class="stat-value" id="total-ops" style="color:#FFB347;">Rp 0</div>
-        </div>
+
         <div class="stat-card margin-card">
-            <div class="stat-title">TOTAL MARGIN BERSIH 💰</div>
-            <div class="stat-value" id="total-margin" style="color:var(--gold); font-family:'Cinzel';">Rp 0</div>
+            <div class="stat-title">TOTAL MARGIN BERSIH</div>
+            <div class="stat-value" id="total-margin" style="color:var(--gold); font-size: 20px;">Rp 0</div>
         </div>
-        <div class="grid-partners" id="partner-list"></div>
+
+        <div class="row-flex">
+            <div class="col-flex">
+                <div class="stat-card marketing-card">
+                    <div class="stat-title" style="color:#FF69B4;">Fee Marketing (5.000/m3)</div>
+                    <div class="stat-value" id="val-memey" style="color:white;">Rp 0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row-flex">
+            <div class="col-flex">
+                <div class="summary-card">
+                    <div class="summary-label">KAS PT. BBS (10%)</div>
+                    <div class="summary-value" id="val-kas" style="color:var(--gold);">Rp 0</div>
+                </div>
+            </div>
+            <div class="col-flex">
+                <div class="summary-card">
+                    <div class="summary-label">MARGIN PER MITRA</div>
+                    <div class="summary-value" id="val-mitra">Rp 0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; color:var(--gold); margin-bottom:15px; font-family:'Cinzel'; font-size: 14px; font-weight: bold;">
+                <span>RINCIAN OPERASIONAL</span>
+                <span onclick="closeModal()" style="cursor:pointer; font-size: 20px;">&times;</span>
+            </div>
+            <table>
+                <thead><tr><th>TGL</th><th>RINCIAN</th><th>NOMINAL</th></tr></thead>
+                <tbody id="list-rincian"></tbody>
+            </table>
+        </div>
     </div>
 
 <script>
-    // DATABASE INI YANG AKAN DIISI OTOMATIS OLEH INPUT_BBS.HTML
+    // FUNGSI JAM & TANGGAL (UPDATE PER DETIK)
+    function updateDateTime() {
+        const now = new Date();
+        
+        // Format Tanggal Panjang (Kiri): Jumat, 27 Maret 2026
+        const dateOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+        document.getElementById('digital-date').innerText = now.toLocaleDateString('id-ID', dateOptions);
+        
+        // Format Jam Digital (Kanan): 12.43.50
+        document.getElementById('digital-clock').innerText = now.toLocaleTimeString('id-ID', {hour12: false});
+    }
+    setInterval(updateDateTime, 1000); updateDateTime();
+
+    // DATABASE & LOGIC
     const dataProyekBBS = {
-        uangBuyer: 150000000,
-        tagihanOwner: 125000000,
+        volumeM3: 6000,
+        hargaPerM3: 285000,
+        tagihanOwner: 1530000000,
+        feeMemeyPerM3: 5000,
         listPengeluaran: [
             { tgl: "27/03", desc: "MAKAN", cost: 2500000 },
             { tgl: "27/03", desc: "KOPI", cost: 1500000 },
-            { tgl: "26/03", desc: "Saldo Awal Proyek", cost: 0 },
+            { tgl: "26/03", desc: "Saldo Awal", cost: 0 },
         ]
     };
 
     function updateDashboard() {
-        let totalKeluar = dataProyekBBS.listPengeluaran.reduce((sum, item) => sum + item.cost, 0);
-        let marginBersih = dataProyekBBS.uangBuyer - dataProyekBBS.tagihanOwner - totalKeluar;
-        let perOrang = marginBersih / 4;
+        let totalBuyer = dataProyekBBS.volumeM3 * dataProyekBBS.hargaPerM3;
+        let totalMemey = dataProyekBBS.volumeM3 * dataProyekBBS.feeMemeyPerM3;
+        let totalOps = dataProyekBBS.listPengeluaran.reduce((sum, item) => sum + item.cost, 0);
+        let marginAwal = totalBuyer - dataProyekBBS.tagihanOwner - totalOps;
+        let kasPT = marginAwal * 0.10;
+        let perMitra = (marginAwal - kasPT) / 4;
 
-        document.getElementById('total-ops').innerText = "Rp " + totalKeluar.toLocaleString('id-ID');
-        document.getElementById('total-margin').innerText = "Rp " + marginBersih.toLocaleString('id-ID');
-        
+        // Tampilkan ke Layar
+        document.getElementById('val-buyer').innerText = "Rp " + totalBuyer.toLocaleString('id-ID');
+        document.getElementById('total-ops').innerText = "Rp " + totalOps.toLocaleString('id-ID');
+        document.getElementById('total-margin').innerText = "Rp " + marginAwal.toLocaleString('id-ID');
+        document.getElementById('val-memey').innerText = "Rp " + totalMemey.toLocaleString('id-ID');
+        document.getElementById('val-kas').innerText = "Rp " + Math.floor(kasPT).toLocaleString('id-ID');
+        document.getElementById('val-mitra').innerText = "Rp " + Math.floor(perMitra).toLocaleString('id-ID');
+
+        // Render Rincian Modal
         let html = '';
-        for(let i=1; i<=4; i++) {
-            html += `<div class="partner-card"><div style="font-size:10px; opacity:0.7;">Mitra ${i}</div><div class="partner-value">Rp ${perOrang.toLocaleString('id-ID')}</div></div>`;
-        }
-        document.getElementById('partner-list').innerHTML = html;
+        dataProyekBBS.listPengeluaran.forEach(item => {
+            html += `<tr><td>${item.tgl}</td><td>${item.desc}</td><td>${item.cost.toLocaleString('id-ID')}</td></tr>`;
+        });
+        document.getElementById('list-rincian').innerHTML = html;
     }
+
+    // FUNGSI MODAL
+    function openModal() { document.getElementById("myModal").style.display = "block"; }
+    function closeModal() { document.getElementById("myModal").style.display = "none"; }
+    window.onclick = function(event) {
+        let modal = document.getElementById("myModal");
+        if (event.target == modal) { modal.style.display = "none"; }
+    }
+
+    // JALANKAN DASHBOARD
     updateDashboard();
 </script>
 </body>
