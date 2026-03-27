@@ -232,65 +232,77 @@
     </div>
 
 <script>
-    // FUNGSI JAM & TANGGAL (UPDATE PER DETIK)
+    // 🕒 UPDATE JAM & TANGGAL
     function updateDateTime() {
         const now = new Date();
-        
-        // Format Tanggal Panjang (Kiri): Jumat, 27 Maret 2026
         const dateOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
         document.getElementById('digital-date').innerText = now.toLocaleDateString('id-ID', dateOptions);
-        
-        // Format Jam Digital (Kanan): 12.43.50
         document.getElementById('digital-clock').innerText = now.toLocaleTimeString('id-ID', {hour12: false});
     }
     setInterval(updateDateTime, 1000); updateDateTime();
 
-    // DATABASE & LOGIC
-    const dataProyekBBS = {
-        volumeM3: 6000,
-        hargaPerM3: 285000,
-        tagihanOwner: 1530000000,
+    // 📊 DATABASE BBS (Sekarang bisa diotak-atik)
+    let dataProyekBBS = {
+        volumeM3: 3000,
+        hargaPerM3: 120000,
+        tagihanOwner: 250000000,
         feeMemeyPerM3: 5000,
         listPengeluaran: [
-            { tgl: "27/03", desc: "MAKAN", cost: 2500000 },
-            { tgl: "27/03", desc: "KOPI", cost: 1500000 },
-            { tgl: "26/03", desc: "Saldo Awal", cost: 0 },
+            { id: 1, tgl: "27/03", desc: "MAKAN", cost: 2500000 },
+            { id: 2, tgl: "27/03", desc: "KOPI", cost: 1500000 },
+            { id: 3, tgl: "26/03", desc: "Saldo Awal", cost: 0 },
         ]
     };
 
+    // 🧮 LOGIC HITUNG SALDO
     function updateDashboard() {
         let totalBuyer = dataProyekBBS.volumeM3 * dataProyekBBS.hargaPerM3;
         let totalMemey = dataProyekBBS.volumeM3 * dataProyekBBS.feeMemeyPerM3;
         let totalOps = dataProyekBBS.listPengeluaran.reduce((sum, item) => sum + item.cost, 0);
+        
         let marginAwal = totalBuyer - dataProyekBBS.tagihanOwner - totalOps;
         let kasPT = marginAwal * 0.10;
         let perMitra = (marginAwal - kasPT) / 4;
 
-        // Tampilkan ke Layar
+        // Update Tampilan Dashboard
         document.getElementById('val-buyer').innerText = "Rp " + totalBuyer.toLocaleString('id-ID');
         document.getElementById('total-ops').innerText = "Rp " + totalOps.toLocaleString('id-ID');
-        document.getElementById('total-margin').innerText = "Rp " + marginAwal.toLocaleString('id-ID');
+        document.getElementById('total-margin').innerText = "Rp " + (marginAwal > 0 ? marginAwal.toLocaleString('id-ID') : 0);
         document.getElementById('val-memey').innerText = "Rp " + totalMemey.toLocaleString('id-ID');
-        document.getElementById('val-kas').innerText = "Rp " + Math.floor(kasPT).toLocaleString('id-ID');
-        document.getElementById('val-mitra').innerText = "Rp " + Math.floor(perMitra).toLocaleString('id-ID');
+        document.getElementById('val-kas').innerText = "Rp " + (kasPT > 0 ? Math.floor(kasPT).toLocaleString('id-ID') : 0);
+        document.getElementById('val-mitra').innerText = "Rp " + (perMitra > 0 ? Math.floor(perMitra).toLocaleString('id-ID') : 0);
 
-        // Render Rincian Modal
+        // Render Tabel dengan Tombol Hapus
         let html = '';
-        dataProyekBBS.listPengeluaran.forEach(item => {
-            html += `<tr><td>${item.tgl}</td><td>${item.desc}</td><td>${item.cost.toLocaleString('id-ID')}</td></tr>`;
+        dataProyekBBS.listPengeluaran.forEach((item, index) => {
+            html += `
+                <tr>
+                    <td>${item.tgl}</td>
+                    <td>${item.desc}</td>
+                    <td>${item.cost.toLocaleString('id-ID')}</td>
+                    <td style="text-align:right;">
+                        <button onclick="hapusData(${index})" style="background:none; border:none; color:#FF6B6B; cursor:pointer; font-size:16px;">🗑️</button>
+                    </td>
+                </tr>`;
         });
         document.getElementById('list-rincian').innerHTML = html;
     }
 
-    // FUNGSI MODAL
+    // 🗑️ FUNGSI HAPUS DATA
+    function hapusData(index) {
+        if(confirm("Yakin mau hapus pengeluaran ini, Bos?")) {
+            dataProyekBBS.listPengeluaran.splice(index, 1); // Hapus dari array
+            updateDashboard(); // Hitung ulang semua
+        }
+    }
+
+    // 🔓 MODAL CONTROL
     function openModal() { document.getElementById("myModal").style.display = "block"; }
     function closeModal() { document.getElementById("myModal").style.display = "none"; }
     window.onclick = function(event) {
-        let modal = document.getElementById("myModal");
-        if (event.target == modal) { modal.style.display = "none"; }
+        if (event.target == document.getElementById("myModal")) closeModal();
     }
 
-    // JALANKAN DASHBOARD
     updateDashboard();
 </script>
 </body>
