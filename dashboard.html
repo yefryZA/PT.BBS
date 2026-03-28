@@ -14,10 +14,10 @@
         .time-bar { background: rgba(0,0,0,0.3); padding: 8px 15px; border-bottom: 1px solid rgba(212,175,55,0.2); display: flex; justify-content: space-between; align-items: center; color: var(--cream); font-size: 11px; font-weight: 600; }
         #digital-clock { font-family: 'Orbitron', sans-serif; font-size: 14px; color: var(--gold); }
         .content-container { padding: 15px; max-width: 600px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; flex-grow: 1; }
-        .proyek-card { background: rgba(255,255,255,0.03); border-radius: 12px; padding: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        .proyek-card { background: rgba(255,255,255,0.03); border-radius: 12px; padding: 12px; text-align: center; border: 1px solid var(--gold); }
         .row-flex { display: flex; gap: 10px; }
         .col-flex { flex: 1; min-width: 0; }
-        .stat-card { background: var(--card-bg); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 15px; padding: 15px 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center; }
+        .stat-card { background: var(--card-bg); border: 1px solid var(--gold);; border-radius: 15px; padding: 15px 10px; box-shadow: 0 4px 10px var(--gold);; text-align: center; }
         .stat-title { font-size: 8px; color: var(--gold); font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
         .stat-value { font-size: 16px; font-weight: bold; }
         .margin-card { border: 2px solid var(--gold); background: linear-gradient(135deg, #0A192F 0%, #102A43 100%); }
@@ -79,11 +79,13 @@
 
 .designer-credit {
     font-size: 12px;
-    color: rgba(253, 253, 208, 0.5); /* Warna Cream pudar */
+    color: rgba(253, 253, 208, 0.5); 
     text-align: center;
-    margin-top: 15px;
+    margin-top: 20px;
+    margin-bottom: 100px; /* <--- INI KUNCINYA: Kasih jarak 100px biar gak kependem di HP */
     font-family: 'Poppins', sans-serif;
     letter-spacing: 1px;
+    padding-bottom: 20px;
 }
     </style>
 </head>
@@ -146,18 +148,15 @@
         <div class="stat-value" id="val-memey" style="color:white; font-size: 18px;">Rp 0</div>
     </div>
 
+</div> <div class="running-text-container">
+    <div class="marquee-text">
+        NIAT BAIK 🎀 KERJA BAIK 🎀 REZEKI BAIK • NIAT BAIK 🎀 KERJA BAIK 🎀 REZEKI BAIK
+    </div>
 </div>
 
-<div class="running-text-container">
-        <div class="marquee-text">
-            NIAT BAIK 🎀 KERJA BAIK 🎀 REZEKI BAIK
-        </div>
-    </div>
-
-    <div class="designer-credit">
-        desain web by_yefry.ZA © BBS-2026
-    </div>
-</div> 
+<div class="designer-credit">
+    desain web by_yefry.ZA © BBS-2026
+</div>
 
     <div id="myModal" class="modal">
         <div class="modal-content">
