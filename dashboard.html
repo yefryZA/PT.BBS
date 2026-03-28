@@ -53,9 +53,9 @@
         <div class="modal-content">
             <h2 style="color:var(--gold); font-family:'Cinzel'; font-size: 18px; margin-bottom: 5px;">PILIH PROYEK</h2>
             <p style="color:var(--cream); font-size: 10px; margin-bottom: 20px;">PT. BERKAH BAJA STEEL</p>
-            <button class="btn-main btn-gold" onclick="pilihProyek('Marunda', 'Pengiriman Split ke Marunda')">1. PROYEK MARUNDA</button>
-            <button class="btn-main btn-gold" onclick="pilihProyek('Cilegon', 'Pengolahan Pasir Cilegon')">2. PROYEK CILEGON</button>
-            <button class="btn-main btn-gold" onclick="pilihProyek('IKN', 'Suplai Material IKN')">3. PROYEK IKN</button>
+            <button class="btn-main btn-gold" onclick="pilihProyek('Marunda', 'Pengiriman Split ke Marunda')">1. PROYEK SPLIT MARUNDA</button>
+            <button class="btn-main btn-gold" onclick="pilihProyek('Cilegon', 'Pengolahan Pasir Cilegon')">2. ------------ </button>
+            <button class="btn-main btn-gold" onclick="pilihProyek('IKN', 'Suplai Material IKN')">3. ------------ </button>
         </div>
     </div>
 
@@ -80,12 +80,12 @@
             <div class="col-flex">
                 <div class="stat-card">
                     <div class="stat-title">UANG MASUK</div>
-                    <div class="stat-value" id="val-buyer" style="color:#77DD77;">Rp 0</div>
+                    <div class="stat-value" id="val-buyer" style="color:#77DD77; font-size: 14px;">Rp 0</div>
                 </div>
             </div>
             <div class="col-flex">
                 <div class="stat-card" onclick="openRincian()" style="cursor:pointer; border-color: #FFB347;">
-                    <div class="stat-title">OPERASIONAL 📤 (KLIK)</div>
+                    <div class="stat-title">BIAYA OPERASIONAL 📤 (KLIK)</div>
                     <div class="stat-value" id="total-ops" style="color:#FFB347;">Rp 0</div>
                 </div>
             </div>
@@ -105,7 +105,7 @@
             </div>
             <div class="col-flex">
                 <div class="stat-card" style="border-style: dashed; opacity: 0.9;">
-                    <div class="stat-title">BAGI HASIL MITRA</div>
+                    <div class="stat-title">BAGI HASIL</div>
                     <div class="stat-value" id="val-mitra" style="font-size: 14px;">Rp 0</div>
                 </div>
             </div>
@@ -120,7 +120,7 @@
     </div>
 
     <div class="running-text-container">
-        <div class="marquee-text">• NIAT BAIK ※ KERJA BAIK ※ REZEKI BAIK •</div>
+        <div class="marquee-text">⚓ NIAT BAIK ※ KERJA BAIK ※ REZEKI BAIK ⚓</div>
     </div>
 
     <div class="designer-credit">desain web by_yefry.ZA © BBS-2026</div>
@@ -170,29 +170,38 @@
         };
 
         function updateDashboard(list) {
-    // 1. SETTINGAN TIAP PROYEK (Sesuaikan angka aslinya di sini Bos!)
-    let vol, hrg, tagihanOwner, feeMkt = 5000;
+    // 1. SETTINGAN TIAP PROYEK (Sesuaikan di sini Bos!)
+    let vol, hrg, tagihanOwner, pembagiMitra, feeMkt = 5000;
 
     if (proyekID === 'Marunda') {
-        vol = 6000;           // Volume Marunda
-        hrg = 285000;         // Harga Marunda
-        tagihanOwner = 1590000000;
+        vol = 3000;           
+        hrg = 285000;         
+        tagihanOwner = 795000000;
+        pembagiMitra = 3;
     } else if (proyekID === 'Cilegon') {
-        vol = 4500;           // Contoh: Volume Cilegon lebih kecil
-        hrg = 150000;         // Contoh: Harga Pasir lebih murah
+        vol = 0;           
+        hrg = 150000;         
         tagihanOwner = 600000000;
+        pembagiMitra = 3;
     } else if (proyekID === 'IKN') {
-        vol = 10000;          // Contoh: Proyek IKN Gede!
-        hrg = 450000;         // Harga material premium
+        vol = 0;          
+        hrg = 450000;         
         tagihanOwner = 4000000000;
+        pembagiMitra = 3;
     }
 
     // 2. RUMUS KALKULASI OTOMATIS
     let totalBuyer = vol * hrg;
     let totalOps = list.reduce((sum, item) => sum + item.cost, 0);
+    
+    // Margin Bersih = (Harga Buyer) - (Tagihan Owner) - (Operasional)
     let marginBersih = totalBuyer - tagihanOwner - totalOps;
+    
+    // Alokasi Kas PT (10%)
     let kasPT = marginBersih * 0.10;
-    let jatahMitra = (marginBersih - kasPT) / 4;
+    
+    // Jatah Per Mitra (Sesuai pembagi yang diatur di atas)
+    let jatahMitra = (marginBersih - kasPT) / pembagiMitra;
 
     // 3. TAMPILKAN KE LAYAR (BOMM!)
     document.getElementById('val-buyer').innerText = "Rp " + totalBuyer.toLocaleString('id-ID');
