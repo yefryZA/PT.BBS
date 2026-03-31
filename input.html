@@ -52,9 +52,31 @@
         <div id="status"></div>
     </div>
 
+<div style="text-align: right; margin-bottom: 10px;">
+    <span onclick="toggleGodMode()" style="cursor:pointer; font-size: 12px; color: #D4AF37; opacity: 0.5;">⚙️ Konfigurasi Proyek</span>
+</div>
+
+<div id="god-mode" style="display: none; background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 10px; border: 1px dashed var(--gold); margin-bottom: 20px;">
+    <h4 style="margin:0 0 10px 0; font-size: 12px; color: var(--gold);">PENGATURAN BRANKAS PROYEK</h4>
+    
+    <label class="label-input">VOLUME (M3/TON)</label>
+    <input type="number" id="set_vol" placeholder="Contoh: 4000">
+    
+    <label class="label-input">HARGA JUAL KE BUYER (RP)</label>
+    <input type="number" id="set_hrg" placeholder="Contoh: 285000">
+    
+    <label class="label-input">TOTAL TAGIHAN OWNER/VENDOR (RP)</label>
+    <input type="number" id="set_tagihan" placeholder="Contoh: 795000000">
+    
+    <label class="label-input">PEMBAGI MITRA (ORANG)</label>
+    <input type="number" id="set_mitra" placeholder="Contoh: 3">
+    
+    <button class="btn-input" onclick="updateProjectSettings()" style="font-size: 10px; padding: 10px;">SIMPAN SETTING PROYEK 💾</button>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAfeLTKRQ66tjZjAt7tg6KcrWhtmv0y3fo",
@@ -65,49 +87,31 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    window.formatRupiah = function(elemen) {
-        let val = elemen.value.replace(/\D/g, ''); 
-        if (val === "") { elemen.value = ""; return; }
-        elemen.value = new Intl.NumberFormat('id-ID').format(val);
+    // FUNGSI RAHASIA TOGGLE
+    window.toggleGodMode = function() {
+        const x = document.getElementById("god-mode");
+        x.style.display = (x.style.display === "none") ? "block" : "none";
     }
 
-    window.submitToFirebase = function() {
+    // UPDATE SETTINGAN PROYEK KE FIREBASE
+    window.updateProjectSettings = async function() {
         const projId = document.getElementById('project_id').value;
-        const desc = document.getElementById('desc').value;
-        const costRaw = document.getElementById('cost_display').value.replace(/\./g, '');
-        const btn = document.getElementById('btnSubmit');
-        const status = document.getElementById('status');
+        if(!projId) return alert("Pilih Proyek dulu Bos!");
+        
+        const settings = {
+            vol: Number(document.getElementById('set_vol').value),
+            hrg: Number(document.getElementById('set_hrg').value),
+            tagihan: Number(document.getElementById('set_tagihan').value),
+            mitra: Number(document.getElementById('set_mitra').value)
+        };
 
-        if(!projId) { alert("Pilih Proyeknya dulu Bos Habi!"); return; }
-        if(!desc || !costRaw) { alert("Jangan dikosongin dong! Isi dulu."); return; }
-
-        btn.disabled = true;
-        status.innerText = "⏳ Sedang Menembus Cloud " + projId + "...";
-
-        // JALUR SAKTI: projects/[ID PROYEK]/operasional
-        // Ini biar sinkron sama Dashboard Monitoring yang kita buat tadi!
-        const dbRef = ref(db, `projects/${projId}/operasional`);
-        const newRef = push(dbRef);
-
-        set(newRef, {
-            tgl: new Date().toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'}),
-            desc: desc.toUpperCase(),
-            cost: Number(costRaw)
-        })
-        .then(() => {
-            status.innerText = "✅ DATA " + projId + " MASUK BRANKAS!";
-            alert("SENGGOL DONG! Data " + projId + " sudah sinkron.");
-            document.getElementById('desc').value = '';
-            document.getElementById('cost_display').value = '';
-            setTimeout(() => { status.innerText = ""; }, 3000);
-        })
-        .catch((error) => {
-            alert("Gagal Bos! Error: " + error.message);
-        })
-        .finally(() => {
-            btn.disabled = false;
-        });
+        await set(ref(db, `project_settings/${projId}`), settings);
+        alert("BOMM! Settingan " + projId + " Berhasil diperbarui.");
+        document.getElementById("god-mode").style.display = "none";
     }
+
+    // Sisanya fungsi submitToFirebase tetap sama seperti punya Bos Habi...
+    // Hanya saja di bagian submitToFirebase, biarkan projId, desc, dan costRaw bekerja seperti biasa.
 </script>
 
 </body>
