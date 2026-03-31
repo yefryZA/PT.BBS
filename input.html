@@ -6,68 +6,61 @@
     <title>BBS Admin - Multi Project Input</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { background: #050A1A; color: white; font-family: 'Poppins', sans-serif; text-align: center; padding: 20px; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .form-box { background: #0A192F; border: 2px solid #D4AF37; padding: 30px; border-radius: 20px; max-width: 380px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); box-sizing: border-box; }
-        h2 { font-family: 'Cinzel', serif; color: #D4AF37; margin-bottom: 5px; font-size: 18px; }
-        p { font-size: 10px; color: #FDFDD0; opacity: 0.7; margin-bottom: 25px; }
-        .label-input { text-align: left; display: block; font-size: 10px; color: #D4AF37; margin-bottom: 5px; margin-left: 5px; font-weight: bold; text-transform: uppercase; }
+        :root { --gold: #D4AF37; --dark: #0A192F; --bg: #050A1A; }
+        body { background: var(--bg); color: white; font-family: 'Poppins', sans-serif; text-align: center; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
         
-        /* Style untuk Dropdown Pilihan Proyek */
+        .form-box { 
+            background: var(--dark); border: 2px solid var(--gold); padding: 30px; border-radius: 20px; 
+            max-width: 380px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; 
+        }
+
+        h2 { font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 5px; font-size: 18px; }
+        p { font-size: 10px; color: #FDFDD0; opacity: 0.7; margin-bottom: 25px; }
+        .label-input { text-align: left; display: block; font-size: 10px; color: var(--gold); margin-bottom: 5px; font-weight: bold; }
+        
         select, input { 
             width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 8px; 
             border: 1px solid rgba(212, 175, 55, 0.3); background: rgba(255,255,255,0.05); 
-            color: white; box-sizing: border-box; outline: none; font-size: 16px; transition: 0.3s;
-            appearance: none; /* Hilangkan panah default browser */
+            color: white; box-sizing: border-box; outline: none; font-size: 14px;
         }
-        select { background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23D4AF37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; background-size: 15px; }
-        option { background: #0A192F; color: white; }
-        
-        input:focus, select:focus { border-color: #D4AF37; background: rgba(255,255,255,0.1); }
-        .btn-input { width: 100%; padding: 15px; background: linear-gradient(45deg, #D4AF37, #FDFDD0); color: black; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-family: 'Cinzel', serif; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); }
-        .btn-input:active { transform: scale(0.95); }
-        #status { margin-top: 15px; font-size: 11px; color: #D4AF37; font-weight: 600; }
 
-        /* Box Pengaturan Rahasia */
-#god-mode { 
-    background: rgba(212, 175, 55, 0.08); 
-    padding: 20px; 
-    border: 1px dashed #D4AF37; 
-    border-radius: 15px; 
-    margin-bottom: 25px; 
-    text-align: left;
-    box-sizing: border-box; /* Biar gak luber keluar */
-}
+        .btn-input { 
+            width: 100%; padding: 15px; background: linear-gradient(45deg, var(--gold), #FDFDD0); 
+            color: black; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; 
+            font-family: 'Cinzel', serif; transition: 0.3s; 
+        }
 
-/* Input khusus di dalam God Mode biar lebih ramping */
-#god-mode input {
-    padding: 10px;
-    margin-bottom: 15px;
-    font-size: 14px;
-}
+        /* TOMBOL GEAR DI DALAM BOX */
+        .gear-container { text-align: right; margin-top: -15px; margin-bottom: 10px; }
+        .btn-gear { cursor: pointer; font-size: 12px; color: var(--gold); opacity: 0.6; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-gear:hover { opacity: 1; text-shadow: 0 0 10px var(--gold); }
 
-/* Tulisan Gear/Config */
-.btn-config {
-    text-align: right; 
-    margin-bottom: 10px; 
-    font-size: 11px; 
-    color: #D4AF37; 
-    opacity: 0.6; 
-    cursor: pointer;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-.btn-config:hover { opacity: 1; }
+        /* MODAL POPUP MANIS */
+        .modal { 
+            display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); align-items: center; justify-content: center; backdrop-filter: blur(5px);
+        }
+        .modal-content { 
+            background: var(--dark); border: 2px solid var(--gold); padding: 25px; border-radius: 20px; 
+            width: 90%; max-width: 340px; position: relative; animation: popUp 0.3s ease-out;
+        }
+        @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .close-modal { position: absolute; right: 15px; top: 10px; color: var(--gold); cursor: pointer; font-size: 20px; }
     </style>
 </head>
 <body>
 
     <div class="form-box">
+        <div class="gear-container">
+            <span class="btn-gear" onclick="openConfig()">⚙️ Konfigurasi Proyek</span>
+        </div>
+
         <h2>INPUT OPERASIONAL BBS</h2>
-        <p>Pilih Proyek dan Input Data ke Brankas Cloud</p>
+        <p>Input Data Real-time ke Brankas Cloud</p>
         
         <label class="label-input">PILIH PROYEK TUJUAN</label>
-        <select id="project_id">
+        <select id="project_id" onchange="loadCurrentSettings()">
             <option value="" disabled selected>-- Pilih Alamat Proyek --</option>
             <option value="Marunda">PROYEK MARUNDA</option>
             <option value="Cilegon">PROYEK CILEGON</option>
@@ -84,27 +77,26 @@
         <div id="status"></div>
     </div>
 
-<div style="text-align: right; margin-bottom: 10px;">
-    <span onclick="toggleGodMode()" style="cursor:pointer; font-size: 12px; color: #D4AF37; opacity: 0.5;">⚙️ Konfigurasi Proyek</span>
-</div>
-
-<div id="god-mode" style="display: none; background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 10px; border: 1px dashed var(--gold); margin-bottom: 20px;">
-    <h4 style="margin:0 0 10px 0; font-size: 12px; color: var(--gold);">PENGATURAN BRANKAS PROYEK</h4>
-    
-    <label class="label-input">VOLUME (M3/TON)</label>
-    <input type="number" id="set_vol" placeholder="Contoh: 4000">
-    
-    <label class="label-input">HARGA JUAL KE BUYER (RP)</label>
-    <input type="number" id="set_hrg" placeholder="Contoh: 285000">
-    
-    <label class="label-input">TOTAL TAGIHAN OWNER/VENDOR (RP)</label>
-    <input type="number" id="set_tagihan" placeholder="Contoh: 795000000">
-    
-    <label class="label-input">PEMBAGI MITRA (ORANG)</label>
-    <input type="number" id="set_mitra" placeholder="Contoh: 3">
-    
-    <button class="btn-input" onclick="updateProjectSettings()" style="font-size: 10px; padding: 10px;">SIMPAN SETTING PROYEK 💾</button>
-</div><body>
+    <div id="modalConfig" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeConfig()">&times;</span>
+            <h3 style="font-family:'Cinzel'; color:var(--gold); font-size:14px; margin-bottom:20px;">⚙️ SETTING: <span id="targetProj">...</span></h3>
+            
+            <label class="label-input">VOLUME (M3/TON)</label>
+            <input type="number" id="set_vol" placeholder="0">
+            
+            <label class="label-input">HARGA JUAL KE BUYER (RP)</label>
+            <input type="number" id="set_hrg" placeholder="0">
+            
+            <label class="label-input">TAGIHAN OWNER/VENDOR (RP)</label>
+            <input type="number" id="set_tagihan" placeholder="0">
+            
+            <label class="label-input">PEMBAGI MITRA (ORANG)</label>
+            <input type="number" id="set_mitra" placeholder="3">
+            
+            <button class="btn-input" onclick="updateProjectSettings()" style="font-size: 11px;">SIMPAN SETTING 💾</button>
+        </div>
+    </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -119,17 +111,31 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // FUNGSI RAHASIA TOGGLE
-    window.toggleGodMode = function() {
-        const x = document.getElementById("god-mode");
-        x.style.display = (x.style.display === "none") ? "block" : "none";
+    // BUKA MODAL
+    window.openConfig = async function() {
+        const projId = document.getElementById('project_id').value;
+        if(!projId) return alert("Pilih Nama Proyek dulu Bos Habi!");
+        
+        document.getElementById('targetProj').innerText = projId.toUpperCase();
+        document.getElementById('modalConfig').style.display = 'flex';
+        
+        // Load data lama biar gak capek ngetik ulang
+        const snap = await get(ref(db, `project_settings/${projId}`));
+        if(snap.exists()) {
+            const d = snap.val();
+            document.getElementById('set_vol').value = d.vol;
+            document.getElementById('set_hrg').value = d.hrg;
+            document.getElementById('set_tagihan').value = d.tagihan;
+            document.getElementById('set_mitra').value = d.mitra;
+        }
     }
 
-    // UPDATE SETTINGAN PROYEK KE FIREBASE
+    // TUTUP MODAL
+    window.closeConfig = () => { document.getElementById('modalConfig').style.display = 'none'; }
+
+    // UPDATE KE FIREBASE
     window.updateProjectSettings = async function() {
         const projId = document.getElementById('project_id').value;
-        if(!projId) return alert("Pilih Proyek dulu Bos!");
-        
         const settings = {
             vol: Number(document.getElementById('set_vol').value),
             hrg: Number(document.getElementById('set_hrg').value),
@@ -138,13 +144,39 @@
         };
 
         await set(ref(db, `project_settings/${projId}`), settings);
-        alert("BOMM! Settingan " + projId + " Berhasil diperbarui.");
-        document.getElementById("god-mode").style.display = "none";
+        alert("SENGGOL DONG! Settingan Berhasil Disimpan.");
+        closeConfig();
     }
 
-    // Sisanya fungsi submitToFirebase tetap sama seperti punya Bos Habi...
-    // Hanya saja di bagian submitToFirebase, biarkan projId, desc, dan costRaw bekerja seperti biasa.
-</script>
+    // FORMAT RUPIAH
+    window.formatRupiah = function(elemen) {
+        let val = elemen.value.replace(/\D/g, ''); 
+        if (val === "") { elemen.value = ""; return; }
+        elemen.value = new Intl.NumberFormat('id-ID').format(val);
+    }
 
+    // SUBMIT DATA OPERASIONAL
+    window.submitToFirebase = function() {
+        const projId = document.getElementById('project_id').value;
+        const desc = document.getElementById('desc').value;
+        const costRaw = document.getElementById('cost_display').value.replace(/\./g, '');
+        const status = document.getElementById('status');
+
+        if(!projId || !desc || !costRaw) return alert("Isi semua data dulu Bos!");
+
+        status.innerText = "⏳ Sedang Menembus Cloud...";
+        const dbRef = ref(db, `projects/${projId}/operasional`);
+        push(dbRef, {
+            tgl: new Date().toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'}),
+            desc: desc.toUpperCase(),
+            cost: Number(costRaw)
+        }).then(() => {
+            status.innerText = "✅ DATA MASUK BRANKAS!";
+            document.getElementById('desc').value = '';
+            document.getElementById('cost_display').value = '';
+            setTimeout(() => status.innerText = "", 3000);
+        });
+    }
+</script>
 </body>
 </html>
