@@ -181,34 +181,36 @@
     }
 
     window.resetDataProyek = function() {
-    const idProyek = document.getElementById('select-proyek').value;
+        // Cimi sesuaikan ID-nya jadi 'project_id' sesuai HTML Bos
+        const idProyek = document.getElementById('project_id').value;
 
-    if (!idProyek || idProyek === "-- PILIH PROYEK --") {
-        alert("Pilih dulu proyek mana yang mau dikosongkan, Bos!");
-        return;
-    }
-
-    const konfirmasi = confirm(`⚠️ PERINGATAN KERAS BOS! ⚠️\n\nSemua data operasional/pengeluaran untuk proyek [${idProyek}] akan DIHAPUS PERMANEN.\n\nApakah Bos yakin?`);
-
-    if (konfirmasi) {
-        // Proteksi Password Sederhana
-        const pass = prompt("Masukkan Password Otoritas untuk menghapus:");
-        
-        if (pass === "BBS2026") {
-            const nodeOps = ref(db, `projects/${idProyek}/operasional`);
-            
-            remove(nodeOps)
-                .then(() => {
-                    alert("CLEAN! Data operasional proyek " + idProyek + " sudah bersih kembali.");
-                })
-                .catch((error) => {
-                    alert("Gagal menghapus: " + error.message);
-                });
-        } else {
-            alert("Password Salah! Akses ditolak.");
+        if (!idProyek) {
+            alert("Pilih dulu proyek mana yang mau dikosongkan di menu utama, Bos!");
+            return;
         }
-    }
-};
+
+        const konfirmasi = confirm(`⚠️ PERINGATAN KERAS BOS! ⚠️\n\nSemua data operasional/pengeluaran untuk proyek [${idProyek}] akan DIHAPUS PERMANEN.\n\nApakah Bos yakin?`);
+
+        if (konfirmasi) {
+            const pass = prompt("Masukkan Password Otoritas untuk menghapus:");
+            
+            if (pass === "BBS2026") {
+                // Pastikan variabel 'db' sudah terdefinisi di atas
+                const nodeOps = ref(db, `projects/${idProyek}/operasional`);
+                
+                remove(nodeOps)
+                    .then(() => {
+                        alert("CLEAN! Data operasional proyek " + idProyek + " sudah bersih kembali.");
+                        closeConfig(); // Tutup modal otomatis setelah hapus
+                    })
+                    .catch((error) => {
+                        alert("Gagal menghapus: " + error.message);
+                    });
+            } else {
+                alert("Password Salah! Akses ditolak.");
+            }
+        }
+    };
     
 </script>
 </body>
