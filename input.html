@@ -3,106 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BBS Admin - Multi Project Input</title>
+    <title>BBS Admin - Direct Project Input</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #D4AF37; --dark: #0A192F; --bg: #050A1A; }
-        body { background: var(--bg); color: white; font-family: 'Poppins', sans-serif; text-align: center; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        body { background: #050A1A; color: white; font-family: 'Poppins', sans-serif; text-align: center; padding: 20px; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .form-box { background: #0A192F; border: 2px solid #D4AF37; padding: 30px; border-radius: 20px; max-width: 380px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); box-sizing: border-box; }
+        h2 { font-family: 'Cinzel', serif; color: #D4AF37; margin-bottom: 5px; font-size: 18px; text-transform: uppercase; }
+        p { font-size: 10px; color: #FDFDD0; opacity: 0.7; margin-bottom: 25px; letter-spacing: 1px; }
+        .label-input { text-align: left; display: block; font-size: 10px; color: #D4AF37; margin-bottom: 5px; margin-left: 5px; font-weight: bold; text-transform: uppercase; }
         
-        .form-box { 
-            background: var(--dark); border: 2px solid var(--gold); padding: 30px; border-radius: 20px; 
-            max-width: 380px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; 
-        }
-
-        h2 { font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 5px; font-size: 18px; }
-        p { font-size: 10px; color: #FDFDD0; opacity: 0.7; margin-bottom: 25px; }
-        .label-input { text-align: left; display: block; font-size: 10px; color: var(--gold); margin-bottom: 5px; font-weight: bold; }
-        
-        select, input { 
+        input { 
             width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 8px; 
             border: 1px solid rgba(212, 175, 55, 0.3); background: rgba(255,255,255,0.05); 
-            color: white; box-sizing: border-box; outline: none; font-size: 14px;
+            color: white; box-sizing: border-box; outline: none; font-size: 16px; transition: 0.3s;
         }
-
-        .btn-input { 
-            width: 100%; padding: 15px; background: linear-gradient(45deg, var(--gold), #FDFDD0); 
-            color: black; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; 
-            font-family: 'Cinzel', serif; transition: 0.3s; 
-        }
-
-        /* TOMBOL GEAR DI DALAM BOX */
-        .gear-container { text-align: right; margin-top: -15px; margin-bottom: 10px; }
-        .btn-gear { cursor: pointer; font-size: 12px; color: var(--gold); opacity: 0.6; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px; }
-        .btn-gear:hover { opacity: 1; text-shadow: 0 0 10px var(--gold); }
-
-        /* MODAL POPUP MANIS */
-        .modal { 
-            display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.8); align-items: center; justify-content: center; backdrop-filter: blur(5px);
-        }
-        .modal-content { 
-            background: var(--dark); border: 2px solid var(--gold); padding: 25px; border-radius: 20px; 
-            width: 90%; max-width: 340px; position: relative; animation: popUp 0.3s ease-out;
-        }
-        @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        .close-modal { position: absolute; right: 15px; top: 10px; color: var(--gold); cursor: pointer; font-size: 20px; }
+        
+        input:focus { border-color: #D4AF37; background: rgba(255,255,255,0.1); }
+        .btn-input { width: 100%; padding: 15px; background: linear-gradient(45deg, #D4AF37, #FDFDD0); color: black; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-family: 'Cinzel', serif; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); }
+        .btn-input:active { transform: scale(0.95); }
+        .btn-input:disabled { opacity: 0.5; cursor: not-allowed; }
+        #status { margin-top: 15px; font-size: 11px; color: #D4AF37; font-weight: 600; min-height: 15px; }
+        
+        /* Badge Proyek Aktif */
+        .project-badge { background: rgba(212, 175, 55, 0.1); border: 1px dashed #D4AF37; padding: 8px; border-radius: 5px; margin-bottom: 20px; font-size: 12px; font-weight: bold; color: #FDFDD0; }
     </style>
 </head>
 <body>
 
     <div class="form-box">
-        <div class="gear-container">
-            <span class="btn-gear" onclick="openConfig()">⚙️ Konfigurasi Proyek</span>
+        <h2>INPUT OPERASIONAL</h2>
+        <p id="display-nama-pt">SINKRONISASI...</p>
+        
+        <div class="project-badge">
+            STATUS: BRANKAS AKTIF 🔒
         </div>
 
-        <h2>INPUT OPERASIONAL BBS</h2>
-        <p>Input Data Real-time ke Brankas Cloud</p>
-        
-        <label class="label-input">PILIH PROYEK TUJUAN</label>
-        <select id="project_id" onchange="loadCurrentSettings()">
-            <option value="" disabled selected>-- Pilih Alamat Proyek --</option>
-            <option value="Marunda">Quary PT. SAM</option>
-            <option value="Cilegon">Quary PT. BBMI</option>
-            <option value="IKN">Quary PT. Anugrah</option>
-        </select>
-
         <label class="label-input">RINCIAN KERJA / BARANG</label>
-        <input type="text" id="desc" placeholder="Contoh: BENSIN, MAKAN, TOOLKIT">
+        <input type="text" id="desc" placeholder="Contoh: SOLAR, MAKAN DRIVER">
         
         <label class="label-input">NOMINAL PENGELUARAN (RP)</label>
         <input type="text" id="cost_display" placeholder="Rp 0" oninput="formatRupiah(this)">
         
-        <button class="btn-input" id="btnSubmit" onclick="submitToFirebase()">INPUT BOMM! 🚀</button>
+        <button class="btn-input" id="btnSubmit" onclick="submitToFirebase()">INPUT DATA! 🚀</button>
         <div id="status"></div>
-    </div>
-
-    <div id="modalConfig" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeConfig()">&times;</span>
-            <h3 style="font-family:'Cinzel'; color:var(--gold); font-size:14px; margin-bottom:20px;">⚙️ SETTING: <span id="targetProj">...</span></h3>
-            
-            <label class="label-input">VOLUME (M3/TON)</label>
-            <input type="number" id="set_vol" placeholder="0">
-            
-            <label class="label-input">HARGA JUAL KE BUYER (RP)</label>
-            <input type="number" id="set_hrg" placeholder="0">
-            
-            <label class="label-input">TAGIHAN OWNER/VENDOR (RP)</label>
-            <input type="number" id="set_tagihan" placeholder="0">
-            
-            <label class="label-input">PEMBAGI MITRA (ORANG)</label>
-            <input type="number" id="set_mitra" placeholder="3">
-            
-            <button class="btn-input" onclick="updateProjectSettings()" style="font-size: 11px;">SIMPAN SETTING 💾</button>
-    
-    <button class="btn-input" onclick="resetDataProyek()" style="font-size: 11px; background: #ff4d4d; margin-top: 15px; border: 1px solid white;">HAPUS SEMUA DATA OPS 🗑️</button>
-        </div>
     </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, set, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAfeLTKRQ66tjZjAt7tg6KcrWhtmv0y3fo",
@@ -113,105 +61,59 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // BUKA MODAL
-    window.openConfig = async function() {
-        const projId = document.getElementById('project_id').value;
-        if(!projId) return alert("Pilih Nama Proyek dulu Bos Habi!");
-        
-        document.getElementById('targetProj').innerText = projId.toUpperCase();
-        document.getElementById('modalConfig').style.display = 'flex';
-        
-        // Load data lama biar gak capek ngetik ulang
-        const snap = await get(ref(db, `project_settings/${projId}`));
-        if(snap.exists()) {
-            const d = snap.val();
-            document.getElementById('set_vol').value = d.vol;
-            document.getElementById('set_hrg').value = d.hrg;
-            document.getElementById('set_tagihan').value = d.tagihan;
-            document.getElementById('set_mitra').value = d.mitra;
-        }
-    }
+    // ==========================================
+    // BAGIAN YANG HARUS DIGANTI SAAT KLONING:
+    // ==========================================
+    const proyekID = "Marunda"; // Ganti: "Marunda", "Cilegon", atau "IKN"
+    const proyekNama = "PT. SAM (MARUNDA)"; // Nama yang tampil di atas
+    // ==========================================
 
-    // TUTUP MODAL
-    window.closeConfig = () => { document.getElementById('modalConfig').style.display = 'none'; }
+    window.onload = () => {
+        document.getElementById('display-nama-pt').innerText = proyekNama;
+    };
 
-    // UPDATE KE FIREBASE
-    window.updateProjectSettings = async function() {
-        const projId = document.getElementById('project_id').value;
-        const settings = {
-            vol: Number(document.getElementById('set_vol').value),
-            hrg: Number(document.getElementById('set_hrg').value),
-            tagihan: Number(document.getElementById('set_tagihan').value),
-            mitra: Number(document.getElementById('set_mitra').value)
-        };
-
-        await set(ref(db, `project_settings/${projId}`), settings);
-        alert("SENGGOL DONG! Settingan Berhasil Disimpan.");
-        closeConfig();
-    }
-
-    // FORMAT RUPIAH
     window.formatRupiah = function(elemen) {
         let val = elemen.value.replace(/\D/g, ''); 
         if (val === "") { elemen.value = ""; return; }
         elemen.value = new Intl.NumberFormat('id-ID').format(val);
     }
 
-    // SUBMIT DATA OPERASIONAL
     window.submitToFirebase = function() {
-        const projId = document.getElementById('project_id').value;
         const desc = document.getElementById('desc').value;
         const costRaw = document.getElementById('cost_display').value.replace(/\./g, '');
+        const btn = document.getElementById('btnSubmit');
         const status = document.getElementById('status');
 
-        if(!projId || !desc || !costRaw) return alert("Isi semua data dulu Bos!");
+        if(!desc || !costRaw) { alert("Data masih kosong, Bos!"); return; }
 
-        status.innerText = "⏳ Sedang Menembus Cloud...";
-        const dbRef = ref(db, `projects/${projId}/operasional`);
-        push(dbRef, {
+        btn.disabled = true;
+        status.innerText = "⏳ Mengirim data ke " + proyekID + "...";
+
+        // JALUR SAKTI SINKRON KE DASHBOARD
+        const dbRef = ref(db, `projects/${proyekID}/operasional`);
+        const newRef = push(dbRef);
+
+        set(newRef, {
             tgl: new Date().toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'}),
             desc: desc.toUpperCase(),
             cost: Number(costRaw)
-        }).then(() => {
-            status.innerText = "✅ DATA MASUK BRANKAS!";
+        })
+        .then(() => {
+            status.innerText = "✅ MASUK BRANKAS " + proyekID + "!";
+            alert("SUKSES! Data sudah sinkron ke Monitoring.");
             document.getElementById('desc').value = '';
             document.getElementById('cost_display').value = '';
-            setTimeout(() => status.innerText = "", 3000);
+            setTimeout(() => { status.innerText = ""; }, 3000);
+        })
+        .catch((error) => {
+            alert("Gagal Bos! Cek sinyal. Error: " + error.message);
+            status.innerText = "❌ ERROR!";
+        })
+        .finally(() => {
+            btn.disabled = false;
         });
     }
-
-    window.resetDataProyek = function() {
-        // Cimi sesuaikan ID-nya jadi 'project_id' sesuai HTML Bos
-        const idProyek = document.getElementById('project_id').value;
-
-        if (!idProyek) {
-            alert("Pilih dulu proyek mana yang mau dikosongkan di menu utama, Bos!");
-            return;
-        }
-
-        const konfirmasi = confirm(`⚠️ PERINGATAN KERAS BOS! ⚠️\n\nSemua data operasional/pengeluaran untuk proyek [${idProyek}] akan DIHAPUS PERMANEN.\n\nApakah Bos yakin?`);
-
-        if (konfirmasi) {
-            const pass = prompt("Masukkan Password Otoritas untuk menghapus:");
-            
-            if (pass === "BBS2026") {
-                // Pastikan variabel 'db' sudah terdefinisi di atas
-                const nodeOps = ref(db, `projects/${idProyek}/operasional`);
-                
-                remove(nodeOps)
-                    .then(() => {
-                        alert("CLEAN! Data operasional proyek " + idProyek + " sudah bersih kembali.");
-                        closeConfig(); // Tutup modal otomatis setelah hapus
-                    })
-                    .catch((error) => {
-                        alert("Gagal menghapus: " + error.message);
-                    });
-            } else {
-                alert("Password Salah! Akses ditolak.");
-            }
-        }
-    };
-    
 </script>
+
 </body>
 </html>
