@@ -55,9 +55,8 @@
         <span style="font-size: 0.8em; color: var(--cream);">General Contractor & Logistic</span></h1>
     </div>
     
-    <div onclick="inputDataProyek()" style="position:absolute; right:50px; cursor:pointer; font-size:20px;">⚙️</div>
+    <div onclick="inputDataProyek()" style="position:absolute; right:10px; cursor:pointer; font-size:20px;">⚙️</div>
     
-    <div onclick="location.reload()" style="position:absolute; right:15px; cursor:pointer; font-size:20px;">🔄</div>
 </div>
 
     <div class="time-bar">
@@ -136,7 +135,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+   import { getDatabase, ref, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAfeLTKRQ66tjZjAt7tg6KcrWhtmv0y3fo",
@@ -155,16 +154,28 @@
     // ==========================================
 
     // FUNGSI JALAN OTOMATIS SAAT HALAMAN DIBUKA
-    window.onload = function() {
-        document.getElementById('display-proyek-name').innerText = proyekNama;
+  window.onload = function() {
+    document.getElementById('display-proyek-name').innerText = proyekNama;
+
+    // 1. Dengerin perubahan di folder OPERASIONAL
+    onValue(ref(db, `projects/${proyekID}/operasional`), (snapshot) => {
+        const data = snapshot.val();
+        const list = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         
-        // Langsung dengerin data Firebase
-        onValue(ref(db, `projects/${proyekID}/operasional`), (snapshot) => {
+        // 2. Setiap ada operasional baru, langsung hitung ulang dashboard
+        updateDashboard(list);
+    });
+
+    // 3. Dengerin perubahan di folder SETTINGS (Volume & Harga)
+    onValue(ref(db, `project_settings/${proyekID}`), () => {
+        // Ambil data operasional terakhir untuk hitung ulang saat setting berubah
+        get(ref(db, `projects/${proyekID}/operasional`)).then((snapshot) => {
             const data = snapshot.val();
             const list = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
             updateDashboard(list);
         });
-    };
+    });
+};
 
 // FUNGSI UNTUK INPUT MANUAL (TEKAN TOMBOL REFRESH/LOGO UNTUK PANGGIL)
 window.inputDataProyek = async () => {
