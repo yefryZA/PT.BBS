@@ -181,7 +181,7 @@
 window.inputDataProyek = async () => {
     const volBaru = prompt("Masukkan VOLUME Material Baru:", "0");
     const hrgBaru = prompt("Masukkan HARGA JUAL (Uang Masuk) per Unit:", "0");
-    const tagihanBaru = prompt("Masukkan TOTAL HUTANG MATERIAL (Harga Beli):", "0");
+    const tagihanBaru = prompt("Masukkan harga MATERIAL (Harga Beli):", "0");
 
     if (volBaru !== null && hrgBaru !== null && tagihanBaru !== null) {
         try {
@@ -198,29 +198,43 @@ window.inputDataProyek = async () => {
 };
     
     async function updateDashboard(list) {
-        const snapSetting = await get(ref(db, `project_settings/${proyekID}`));
-        const s = snapSetting.val() || { vol: 0, hrg: 0, tagihan: 0, mitra: 3 };
+    const snapSetting = await get(ref(db, `project_settings/${proyekID}`));
+    const s = snapSetting.val() || { vol: 0, hrg: 0, tagihan: 0, mitra: 3 };
 
-        let feeMkt = 5000;
-        let totalBuyer = s.vol * s.hrg;
-        let totalOps = list.reduce((sum, item) => sum + item.cost, 0);
-        let marginBersih = totalBuyer - s.tagihan - totalOps;
-        let kasPT = marginBersih > 0 ? marginBersih * 0.10 : 0;
-        let jatahMitra = marginBersih > 0 ? (marginBersih - kasPT) / s.mitra : 0;
+    let feeMktPerUnit = 5000;
+    let totalFeeMkt = s.vol * feeMktPerUnit; 
+    let totalBuyer = s.vol * s.hrg;      // Total Uang Masuk
+    let totalBeli = s.vol * s.tagihan;   // TOTAL MODAL (Volume x Harga Beli)
+    let totalOps = list.reduce((sum, item) => sum + item.cost, 0); 
 
-        document.getElementById('val-buyer').innerText = "Rp " + totalBuyer.toLocaleString('id-ID');
-        document.getElementById('total-ops').innerText = "Rp " + totalOps.toLocaleString('id-ID');
-        document.getElementById('total-margin').innerText = "Rp " + (marginBersih > 0 ? marginBersih.toLocaleString('id-ID') : 0);
-        document.getElementById('val-kas').innerText = "Rp " + Math.floor(kasPT).toLocaleString('id-ID');
-        document.getElementById('val-mitra').innerText = "Rp " + Math.floor(jatahMitra).toLocaleString('id-ID');
-        document.getElementById('val-memey').innerText = "Rp " + (s.vol * feeMkt).toLocaleString('id-ID');
+    // 1. HITUNG MARGIN KOTOR
+    // (Uang Masuk - Total Modal Material - Operasional - Fee Marketing)
+    let marginKotor = totalBuyer - totalBeli - totalOps - totalFeeMkt;
 
-        let html = '';
-        [...list].reverse().forEach(item => {
-            html += `<tr><td>${item.tgl}</td><td>${item.desc}</td><td>${item.cost.toLocaleString('id-ID')}</td></tr>`;
-        });
-        document.getElementById('list-rincian').innerHTML = html;
-    }
+    // 2. POTONG KAS PT 10%
+    let kasPT = marginKotor > 0 ? marginKotor * 0.10 : 0;
+
+    // 3. SISA BERSIH SETELAH POTONG KAS
+    let sisaBagiHasil = marginKotor - kasPT;
+
+    // 4. BAGI KE MITRA (Misal dibagi 3)
+    let jatahMitra = sisaBagiHasil > 0 ? sisaBagiHasil / s.mitra : 0;
+
+    // UPDATE TAMPILAN
+    document.getElementById('val-buyer').innerText = "Rp " + totalBuyer.toLocaleString('id-ID');
+    document.getElementById('total-ops').innerText = "Rp " + totalOps.toLocaleString('id-ID');
+    document.getElementById('total-margin').innerText = "Rp " + (sisaBagiHasil > 0 ? Math.floor(sisaBagiHasil).toLocaleString('id-ID') : 0);
+    document.getElementById('val-kas').innerText = "Rp " + Math.floor(kasPT).toLocaleString('id-ID');
+    document.getElementById('val-mitra').innerText = "Rp " + Math.floor(jatahMitra).toLocaleString('id-ID');
+    document.getElementById('val-memey').innerText = "Rp " + totalFeeMkt.toLocaleString('id-ID');
+
+    // Update Tabel Rincian
+    let html = '';
+    [...list].reverse().forEach(item => {
+        html += `<tr><td>${item.tgl}</td><td>${item.desc}</td><td>${item.cost.toLocaleString('id-ID')}</td></tr>`;
+    });
+    document.getElementById('list-rincian').innerHTML = html;
+}
 
   // 3. DOWNLOAD PDF
         window.unduhPDF = () => {
