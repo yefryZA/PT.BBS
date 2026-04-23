@@ -160,23 +160,37 @@
 
     <div class="designer-credit">desain web by_yefry.ZA © BBS-2026</div>
 
-    <div id="rincianModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div style="display:flex; justify-content:space-between; color:var(--gold); margin-bottom:15px; font-weight: bold;">
-                <span>RINCIAN OPS</span><span onclick="closeRincian()" style="cursor:pointer; font-size: 24px;">&times;</span>
-            </div>
-            <div style="max-height: 350px; overflow-y: auto;">
-                <table>
-                    <thead><tr><th>TGL</th><th>HAL</th><th>RP</th></tr></thead>
-                    <tbody id="list-rincian"></tbody>
-                </table>
-            </div>
+    <div id="modal-ops" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center; backdrop-filter: blur(3px);">
+    <div style="background:white; width:95%; max-width:450px; border-radius:15px; overflow:hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+        
+        <div style="background:#FFB347; color:white; padding:15px; display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0; font-size:16px;">📋 RINCIAN OPERASIONAL</h3>
+            <button onclick="tutupOps()" style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">&times;</button>
+        </div>
+        
+        <div style="max-height:400px; overflow-y:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                <thead>
+                    <tr style="background:#941b1b; color: white; text-align:left; border-bottom:2px solid #FFB347;">
+                        <th style="padding:12px 10px;">Tgl</th>
+                        <th style="padding:12px 10px;">Deskripsi</th>
+                        <th style="padding:12px 10px; text-align:right;">Biaya</th>
+                    </tr>
+                </thead>
+                <tbody id="list-rincian" style="color: #000 !important;"></tbody>
+            </table>
+        </div>
+
+        <div style="padding:10px; background:#fcf8f8; text-align:center;">
+            <button onclick="tutupOps()" style="background:#FFB347; color:white; border:none; padding:8px 25px; border-radius:20px; cursor:pointer; font-weight:bold;">TUTUP</button>
         </div>
     </div>
+</div>
+
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-   import { getDatabase, ref, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+   import { getDatabase, ref, onValue, get, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAfeLTKRQ66tjZjAt7tg6KcrWhtmv0y3fo",
@@ -190,11 +204,11 @@
     // ==========================================
     // BAGIAN YANG HARUS DIGANTI SAAT KLONING:
     // ==========================================
-    const proyekID = "rt.sahril"; // Ganti: "Marunda" atau "Cilegon" atau "IKN"
+    const proyekID = "bbs2"; // Ganti: "Marunda" atau "Cilegon" atau "IKN"
     const proyekNama = "Quary Alfa"; // Ganti Nama Tampilan Proyeknya
     // ==========================================
 
-    // FUNGSI JALAN OTOMATIS SAAT HALAMAN DIBUKA
+   // FUNGSI JALAN OTOMATIS SAAT HALAMAN DIBUKA
   window.onload = function() {
     document.getElementById('display-proyek-name').innerText = proyekNama;
 
@@ -239,43 +253,79 @@ window.inputDataProyek = async () => {
 };
     
     async function updateDashboard(list) {
+    // 1. ISI TABEL (Targetkan ID yang unik)
+    let html = '';
+    if (list && list.length > 0) {
+        [...list].reverse().forEach(item => {
+    html += `<tr style="border-bottom:1px solid #eee; color: #000 !important;">
+                <td style="padding:10px;">${item.tgl || '-'}</td>
+                <td style="padding:10px;">${item.desc || '-'}</td>
+                <td style="padding:10px; text-align:right; font-weight:bold;">
+                    ${(Number(item.cost) || 0).toLocaleString('id-ID')}
+                    <span onclick="hapusSatuData('${item.id}')" style="cursor:pointer; margin-left:10px; color:red; font-size:16px;">🗑️</span>
+                </td>
+             </tr>`;
+});
+    } else {
+        html = '<tr><td colspan="3" style="text-align:center; padding:20px; color:red;">Belum ada data operasional.</td></tr>';
+    }
+    
+    // Kirim data ke semua elemen yang punya ID list-rincian (biar aman kalau ada double ID)
+    const wadahSemua = document.querySelectorAll('#list-rincian');
+    wadahSemua.forEach(el => {
+        el.innerHTML = html;
+    });
+
+    // 2. BARU HITUNG KALKULASI SETTINGS
     const snapSetting = await get(ref(db, `project_settings/${proyekID}`));
     const s = snapSetting.val() || { vol: 0, hrg: 0, tagihan: 0, mitra: 3 };
 
     let feeMktPerUnit = 5000;
-    let totalFeeMkt = s.vol * feeMktPerUnit; 
-    let totalBuyer = s.vol * s.hrg;      // Total Uang Masuk
-    let totalBeli = s.vol * s.tagihan;   // TOTAL MODAL (Volume x Harga Beli)
-    let totalOps = list.reduce((sum, item) => sum + item.cost, 0); 
+    let totalFeeMkt = (Number(s.vol) || 0) * feeMktPerUnit; 
+    let totalBuyer = (Number(s.vol) || 0) * (Number(s.hrg) || 0);
+    let totalBeli = (Number(s.vol) || 0) * (Number(s.tagihan) || 0);
+    let totalOps = list.reduce((sum, item) => sum + (Number(item.cost) || 0), 0); 
 
-    // 1. HITUNG MARGIN KOTOR
-    // (Uang Masuk - Total Modal Material - Operasional - Fee Marketing)
     let marginKotor = totalBuyer - totalBeli - totalOps - totalFeeMkt;
-
-    // 2. POTONG KAS PT 10%
     let kasPT = marginKotor > 0 ? marginKotor * 0.10 : 0;
-
-    // 3. SISA BERSIH SETELAH POTONG KAS
     let sisaBagiHasil = marginKotor - kasPT;
-
-    // 4. BAGI KE MITRA (Misal dibagi 3)
     let jatahMitra = sisaBagiHasil > 0 ? sisaBagiHasil / s.mitra : 0;
 
-    // UPDATE TAMPILAN
+    // 3. UPDATE TAMPILAN DASHBOARD
     document.getElementById('val-buyer').innerText = "Rp " + totalBuyer.toLocaleString('id-ID');
     document.getElementById('total-ops').innerText = "Rp " + totalOps.toLocaleString('id-ID');
     document.getElementById('total-margin').innerText = "Rp " + (sisaBagiHasil > 0 ? Math.floor(sisaBagiHasil).toLocaleString('id-ID') : 0);
     document.getElementById('val-kas').innerText = "Rp " + Math.floor(kasPT).toLocaleString('id-ID');
     document.getElementById('val-mitra').innerText = "Rp " + Math.floor(jatahMitra).toLocaleString('id-ID');
     document.getElementById('val-memey').innerText = "Rp " + totalFeeMkt.toLocaleString('id-ID');
-
-    // Update Tabel Rincian
-    let html = '';
-    [...list].reverse().forEach(item => {
-        html += `<tr><td>${item.tgl}</td><td>${item.desc}</td><td>${item.cost.toLocaleString('id-ID')}</td></tr>`;
-    });
-    document.getElementById('list-rincian').innerHTML = html;
 }
+
+// --- FUNGSI BUKA TUTUP MODAL ---
+window.openRincian = () => {
+    const modal = document.getElementById('modal-ops');
+    const isiTabel = document.getElementById('list-rincian');
+    
+    if (isiTabel.innerHTML === "") {
+        alert("Data rincian masih kosong atau sedang loading...");
+    }
+    
+    modal.style.display = 'flex';
+};
+
+window.tutupOps = () => {
+    document.getElementById('modal-ops').style.display = 'none';
+};
+
+window.hapusSatuData = async (itemID) => {
+    if (confirm("Hapus rincian yang ini saja, Bang?")) {
+        try {
+            await remove(ref(db, `projects/${proyekID}/operasional/${itemID}`));
+            // Tidak perlu refresh, onValue bakal langsung update dashboard otomatis
+        } catch (e) {
+            alert("Gagal hapus: " + e.message);
+        }
+    }
+};
 
   window.unduhPDF = async () => {
     // 1. Ambil Data Terbaru dari Firebase
@@ -430,10 +480,29 @@ window.inputDataProyek = async () => {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // Gunakan fungsi promise agar lebih stabil
-    html2pdf().set(opt).from(element).toPdf().get('pdf').save();
-};
+  // 1. Proses Simpan PDF
+    html2pdf().set(opt).from(element).toPdf().get('pdf').save().then(async () => {
+        
+        // 2. Tambahkan Konfirmasi Hapus
+        const yakin = confirm("Laporan PDF sudah diunduh. Apakah Abang ingin MENGHAPUS seluruh rincian operasional dan meriset dashboard?");
+        
+        if (yakin) {
+            // Perintah hapus folder operasional
+            await remove(ref(db, `projects/${proyekID}/operasional`));
+            
+            // Perintah reset setting proyek ke angka 0
+            await update(ref(db, `project_settings/${proyekID}`), {
+                vol: 0,
+                hrg: 0,
+                tagihan: 0
+            });
+            
+            alert("Data Berhasil Dibersihkan!");
+        }
+    });
+}; // Penutup fungsi unduhPDF
 
+    // Bagian Jam Digital (Tetap sama, tidak perlu dirubah)
     setInterval(() => {
         const now = new Date();
         document.getElementById('digital-date').innerText = now.toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
