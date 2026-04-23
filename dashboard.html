@@ -119,20 +119,6 @@
 
     <div class="designer-credit">desain web by_yefry.ZA © BBS-2026</div>
 
-    <div id="rincianModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div style="display:flex; justify-content:space-between; color:var(--gold); margin-bottom:15px; font-weight: bold;">
-                <span>RINCIAN OPS</span><span onclick="closeRincian()" style="cursor:pointer; font-size: 24px;">&times;</span>
-            </div>
-            <div style="max-height: 350px; overflow-y: auto;">
-                <table>
-                    <thead><tr><th>TGL</th><th>HAL</th><th>RP</th></tr></thead>
-                    <tbody id="list-rincian"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
     <div id="modal-ops" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center; backdrop-filter: blur(3px);">
     <div style="background:white; width:95%; max-width:450px; border-radius:15px; overflow:hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
         
@@ -144,13 +130,13 @@
         <div style="max-height:400px; overflow-y:auto;">
             <table style="width:100%; border-collapse:collapse; font-size:13px;">
                 <thead>
-                    <tr style="background:#941b1b; text-align:left; border-bottom:2px solid #FFB347;">
+                    <tr style="background:#941b1b; color: white; text-align:left; border-bottom:2px solid #FFB347;">
                         <th style="padding:12px 10px;">Tgl</th>
                         <th style="padding:12px 10px;">Deskripsi</th>
                         <th style="padding:12px 10px; text-align:right;">Biaya</th>
                     </tr>
                 </thead>
-               <tbody id="list-rincian"></tbody>
+                <tbody id="list-rincian" style="color: #000 !important;"></tbody>
             </table>
         </div>
 
@@ -225,7 +211,7 @@ window.inputDataProyek = async () => {
 };
     
     async function updateDashboard(list) {
-    // 1. ISI TABEL DULUAN (Biar nggak ilang datanya)
+    // 1. ISI TABEL (Targetkan ID yang unik)
     let html = '';
     if (list && list.length > 0) {
         [...list].reverse().forEach(item => {
@@ -236,23 +222,23 @@ window.inputDataProyek = async () => {
                      </tr>`;
         });
     } else {
-        html = '<tr><td colspan="3" style="text-align:center; padding:20px; color:red;">Data List Kosong</td></tr>';
+        html = '<tr><td colspan="3" style="text-align:center; padding:20px; color:red;">Belum ada data operasional.</td></tr>';
     }
     
-    // Langsung tembak ke ID tabel
-    const wadah = document.getElementById('list-rincian');
-    if(wadah) {
-        wadah.innerHTML = html;
-    }
+    // Kirim data ke semua elemen yang punya ID list-rincian (biar aman kalau ada double ID)
+    const wadahSemua = document.querySelectorAll('#list-rincian');
+    wadahSemua.forEach(el => {
+        el.innerHTML = html;
+    });
 
-    // 2. BARU HITUNG KALKULASI (Settings)
+    // 2. BARU HITUNG KALKULASI SETTINGS
     const snapSetting = await get(ref(db, `project_settings/${proyekID}`));
     const s = snapSetting.val() || { vol: 0, hrg: 0, tagihan: 0, mitra: 3 };
 
     let feeMktPerUnit = 5000;
-    let totalFeeMkt = s.vol * feeMktPerUnit; 
-    let totalBuyer = s.vol * s.hrg;
-    let totalBeli = s.vol * s.tagihan;
+    let totalFeeMkt = (Number(s.vol) || 0) * feeMktPerUnit; 
+    let totalBuyer = (Number(s.vol) || 0) * (Number(s.hrg) || 0);
+    let totalBeli = (Number(s.vol) || 0) * (Number(s.tagihan) || 0);
     let totalOps = list.reduce((sum, item) => sum + (Number(item.cost) || 0), 0); 
 
     let marginKotor = totalBuyer - totalBeli - totalOps - totalFeeMkt;
@@ -260,7 +246,7 @@ window.inputDataProyek = async () => {
     let sisaBagiHasil = marginKotor - kasPT;
     let jatahMitra = sisaBagiHasil > 0 ? sisaBagiHasil / s.mitra : 0;
 
-    // 3. UPDATE ANGKA DI KARTU
+    // 3. UPDATE TAMPILAN DASHBOARD
     document.getElementById('val-buyer').innerText = "Rp " + totalBuyer.toLocaleString('id-ID');
     document.getElementById('total-ops').innerText = "Rp " + totalOps.toLocaleString('id-ID');
     document.getElementById('total-margin').innerText = "Rp " + (sisaBagiHasil > 0 ? Math.floor(sisaBagiHasil).toLocaleString('id-ID') : 0);
