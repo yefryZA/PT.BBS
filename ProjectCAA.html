@@ -781,48 +781,48 @@ window.generatePDF = async (tipe) => {
         // [1] PDF TIPE NAS: REKAP EXTERNAL LUAR (TETAP DIJAGA ASLI)
         // =============================================================================================================
         doc.setFontSize(10); 
-        doc.text("REKAP PENGIRIMAN PT. BBS - PT. NAS", 105, 22, { align: "center" });
-        
-        const body = dataSiap.map((i, index) => {
-            const rowLoss = i.volB - i.volM;
-            const tglJamBongkar = `${i.tgl} || ${i.jamB || '--:--'}`; 
+doc.text("REKAP PENGIRIMAN PT. BBS - PT. NAS", 105, 22, { align: "center" });
 
-            return [
-                index + 1, 
-                tglJamBongkar, 
-                hitungDurasi(i.jamM, i.jamB), 
-                i.plat, 
-                i.volM.toFixed(2), 
-                i.volB.toFixed(2), 
-                (rowLoss > 0 ? "+" : "") + rowLoss.toFixed(2)
-            ];
-        });
+const body = dataSiap.map((i, index) => {
+    const rowLoss = i.volB - i.volM;
+    const tglJamBongkar = `${i.tgl} || ${i.jamB || '--:--'}`; 
 
-        doc.autoTable({ 
-            head: [['NO', 'TGL | JAM BONGKAR', 'DURASI', 'PLAT MOBIL', 'MUAT', 'BONGKAR', '+/-']], 
-            body, 
-            startY: 30, 
-            theme: 'grid',
-            styles: { fontSize: 7.5, halign: 'center', cellPadding: 1.5 },
-            headStyles: { fillColor: [41, 128, 185], fontStyle: 'bold' },
-            columnStyles: {
-                0: { cellWidth: 8 },
-                1: { cellWidth: 40 },
-                2: { cellWidth: 32 },
-                3: { cellWidth: 28 },
-                4: { cellWidth: 18 },
-                5: { cellWidth: 18 },
-                6: { cellWidth: 18 }
-            },
-            didDrawCell: (data) => {
-                if (data.section === 'body' && data.column.index === 6) {
-                    const val = data.cell.raw;
-                    if (val.toString().includes('-')) { doc.setTextColor(255, 0, 0); doc.setFont("helvetica", "bold"); }
-                    else if (val.toString().includes('+')) { doc.setTextColor(0, 128, 0); doc.setFont("helvetica", "bold"); }
-                }
-            }
-        });
+    return [
+        index + 1, 
+        tglJamBongkar, 
+        i.barang, // 👈 DIUBAH: Mengganti hitungDurasi(...) menjadi nama barang
+        i.plat, 
+        i.volM.toFixed(2), 
+        i.volB.toFixed(2), 
+        (rowLoss > 0 ? "+" : "") + rowLoss.toFixed(2)
+    ];
+});
 
+doc.autoTable({ 
+    // 👈 DIUBAH: 'DURASI' diganti menjadi 'NAMA BARANG'
+    head: [['NO', 'TGL | JAM BONGKAR', 'NAMA BARANG', 'PLAT MOBIL', 'MUAT', 'BONGKAR', '+/-']], 
+    body, 
+    startY: 30, 
+    theme: 'grid',
+    styles: { fontSize: 7.5, halign: 'center', cellPadding: 1.5 },
+    headStyles: { fillColor: [41, 128, 185], fontStyle: 'bold' },
+    columnStyles: {
+        0: { cellWidth: 8 },
+        1: { cellWidth: 40 },
+        2: { cellWidth: 32 }, // Lebar 32 sudah cukup aman untuk nama barang pendek-sedang
+        3: { cellWidth: 28 },
+        4: { cellWidth: 18 },
+        5: { cellWidth: 18 },
+        6: { cellWidth: 18 }
+    },
+    didDrawCell: (data) => {
+        if (data.section === 'body' && data.column.index === 6) {
+            const val = data.cell.raw;
+            if (val.toString().includes('-')) { doc.setTextColor(255, 0, 0); doc.setFont("helvetica", "bold"); }
+            else if (val.toString().includes('+')) { doc.setTextColor(0, 128, 0); doc.setFont("helvetica", "bold"); }
+        }
+    }
+});
         const finalY = doc.lastAutoTable.finalY + 10;
         const xVal = 80;
         
